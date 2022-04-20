@@ -1,3 +1,3 @@
-My first code using Git and commitments.
+Changes in this code. 
 
 Second commit using more text. 
