@@ -99,13 +99,6 @@ PR005<- read_delim("/Volumes/LaCie/PRISA/UNC_sequences_sep_2021/Reads_renamed/fa
 
 
 ```{r}
-#the hardest way or when I have 2 data frames
-
-ARGs_table <- PR001 %>% 
- full_join(PR002) %>% 
-  full_join(PR003) %>% 
-  full_join(PR004) %>% 
-  full_join(PR005)
 
 #this is the code for replacing NA for 0
 
