@@ -1,0 +1,114 @@
+---
+title: "Counting tables"
+author: "Sara Cifuentes"
+date: '2022-04-21'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Combining various datasets (.txt)
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(dplyr)
+```
+
+```{r}
+#easyest way
+files_gene_reads <- list.files("/Volumes/LaCie/PRISA/UNC_sequences_sep_2021/Reads_renamed/fastqc/fastq_trim/bwa_host/no_host/bwa_resfinder/final_table", pattern ="_gene.tsv", full.names = TRUE)
+
+read_gene_file <- function(file_name){
+  
+  read_delim(file_name, 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE) %>% 
+  clean_names %>% 
+  filter(gene_fraction >= 80) %>% 
+  select(gene, hits) %>% 
+  mutate(sample = basename(file_name),
+         sample = str_extract(sample, "^[A-Z0-9]*"))
+  
+}
+
+read_gene_file("/Volumes/LaCie/PRISA/UNC_sequences_sep_2021/Reads_renamed/fastqc/fastq_trim/bwa_host/no_host/bwa_resfinder/final_table/PR001_gene.tsv")
+
+all_genes_data <- map_df(files_gene_reads, ~read_gene_file(.x))
+
+all_genes_data %>% 
+  pivot_wider(names_from = sample,
+              values_from = hits) %>% 
+  write_tsv("exported-gene-table.txt")
+```
+
+```{r}
+exported_gene_table %>% 
+  select(-PR104) %>% 
+  rename(NAME = gene) %>% 
+  write_tsv("gene_table.txt")
+  
+```
+
+```{r}
+#long way, I took this code and it is the same in the line 23 (all the tables are merged in one table)
+PR001<- read_delim("/Volumes/LaCie/PRISA/UNC_sequences_sep_2021/Reads_renamed/fastqc/fastq_trim/bwa_host/no_host/bwa_resfinder/final_table/PR001_gene.tsv", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE) %>% 
+  clean_names %>% 
+  filter(gene_fraction >= 80) %>% 
+  select(gene, hits) %>% 
+  rename(PR001 = hits)
+
+PR002<- read_delim("/Volumes/LaCie/PRISA/UNC_sequences_sep_2021/Reads_renamed/fastqc/fastq_trim/bwa_host/no_host/bwa_resfinder/final_table/PR002_gene.tsv", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE) %>% 
+  clean_names %>% 
+  filter(gene_fraction >= 80) %>% 
+  select(gene, hits) %>% 
+  rename(PR002 = hits)
+
+PR003<- read_delim("/Volumes/LaCie/PRISA/UNC_sequences_sep_2021/Reads_renamed/fastqc/fastq_trim/bwa_host/no_host/bwa_resfinder/final_table/PR003_gene.tsv", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE) %>% 
+  clean_names %>% 
+  filter(gene_fraction >= 80) %>% 
+  select(gene, hits) %>% 
+  rename(PR003 = hits)
+
+PR004<- read_delim("/Volumes/LaCie/PRISA/UNC_sequences_sep_2021/Reads_renamed/fastqc/fastq_trim/bwa_host/no_host/bwa_resfinder/final_table/PR004_gene.tsv", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE) %>% 
+  clean_names %>% 
+  filter(gene_fraction >= 80) %>% 
+  select(gene, hits) %>% 
+  rename(PR004 = hits)
+
+PR005<- read_delim("/Volumes/LaCie/PRISA/UNC_sequences_sep_2021/Reads_renamed/fastqc/fastq_trim/bwa_host/no_host/bwa_resfinder/final_table/PR005_gene.tsv", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE) %>% 
+  clean_names %>% 
+  filter(gene_fraction >= 80) %>% 
+  select(gene, hits) %>% 
+  rename(PR005 = hits)
+
+```
+
+
+```{r}
+#the hardest way or when I have 2 data frames
+
+ARGs_table <- PR001 %>% 
+ full_join(PR002) %>% 
+  full_join(PR003) %>% 
+  full_join(PR004) %>% 
+  full_join(PR005)
+
+#this is the code for replacing NA for 0
+
+  ARGs_table[is.na(ARGs_table)] <- 0
+```
+
